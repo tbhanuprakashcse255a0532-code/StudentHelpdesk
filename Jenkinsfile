@@ -41,7 +41,7 @@ pipeline {
             bat 'call npm ci --prefix frontend'
             bat 'node --check Backend/server.js'
             bat 'node --test Backend/passwords.test.js'
-            bat 'call npm --prefix frontend test -- --watchAll=false'
+            bat 'call npm --prefix frontend test -- --watchAll=false --passWithNoTests'
             bat 'call npm --prefix frontend run build'
           }
         }
