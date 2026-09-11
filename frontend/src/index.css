@@ -1,8 +1,7 @@
 body {
   margin: 0;
-  font-family: 'Inter', 'Poppins', 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    Arial, sans-serif;
+  font-family: 'Poppins', 'Inter', 'Montserrat', 'Segoe UI', 'Roboto',
+    'Helvetica Neue', Arial, sans-serif;
 
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

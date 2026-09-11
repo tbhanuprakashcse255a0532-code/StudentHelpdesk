@@ -18,16 +18,50 @@
   box-sizing: border-box;
 }
 
+
 body {
   margin: 0;
-  font-family: "Segoe UI", system-ui, sans-serif;
+
+  font-family:
+    "Poppins",
+    "Inter",
+    "Montserrat",
+    "Segoe UI",
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Roboto",
+    "Oxygen",
+    "Ubuntu",
+    "Cantarell",
+    "Fira Sans",
+    "Droid Sans",
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+
   color: var(--text);
   overflow-x: hidden;
+
   background:
-    radial-gradient(circle at top left, rgba(125, 92, 255, 0.18), transparent 28%),
-    radial-gradient(circle at top right, rgba(0, 242, 255, 0.14), transparent 26%),
-    linear-gradient(145deg, var(--bg-1), var(--bg-2), var(--bg-3));
+    radial-gradient(
+      circle at top left,
+      rgba(125, 92, 255, 0.18),
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at top right,
+      rgba(0, 242, 255, 0.14),
+      transparent 26%
+    ),
+    linear-gradient(
+      145deg,
+      var(--bg-1),
+      var(--bg-2),
+      var(--bg-3)
+    );
 }
+
 
 a {
   color: inherit;
