@@ -92,15 +92,32 @@ const EventPage = ({
   );
 };
 
+
+// Student Login component
+// Handles student authentication and login form data
 const StudentLogin = ({ setLoggedIn, setUser, closeLogin }) => {
+
+  // Hook used to navigate to different pages after login
   const navigate = useNavigate();
+
+  // Reference used to access the popup/login container DOM element
   const popupRef = useRef(null);
 
+  // Stores the student's email address
   const [email, setEmail] = useState("");
+
+  // Stores the student's password
   const [password, setPassword] = useState("");
+
+  // Stores the student's branch
   const [branch, setBranch] = useState("");
+
+  // Stores the student's PIN number
   const [pinNumber, setPinNumber] = useState("");
+
+  // Controls the loading state while login is being processed
   const [loading, setLoading] = useState(false);
+
 
   useEffect(() => {
     const handleOutsideClick = (event) => {
