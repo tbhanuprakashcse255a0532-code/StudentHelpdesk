@@ -3,40 +3,40 @@
   {
     "title": "Tech Fest",
     "type": "Tech Fest",
-    "date": "March 25",
-    "time": "10:00 AM",
+    "date": "September 20",
+    "time": "11:00 AM",
     "venue": "Innovation Center",
     "details": "Tech Fest includes coding competitions, project expo, technical quiz, and innovation challenges for students."
   },
   {
     "title": "Exam Schedule",
     "type": "Exam",
-    "date": "April 10",
-    "time": "09:00 AM",
+    "date": "October 5",
+    "time": "09:30 AM",
     "venue": "Academic Building",
-    "details": "Semester examinations begin from April 10. Students should check department notice boards for the detailed timetable."
+    "details": "Semester examinations begin from October 5. Students should check department notice boards for the detailed timetable."
   },
   {
     "title": "AI Workshop",
     "type": "AI Workshop",
-    "date": "March 28",
-    "time": "10:00 AM",
+    "date": "September 25",
+    "time": "02:00 PM",
     "venue": "Computer Lab 2",
     "details": "AI Workshop covers machine learning basics, chatbot design, and practical applications of artificial intelligence."
   },
   {
     "title": "Placements",
     "type": "Placement",
-    "date": "Ongoing",
-    "time": "Office Hours",
+    "date": "October 12",
+    "time": "10:30 AM",
     "venue": "Career Development Center",
     "details": "Placements are ongoing for final year students. Eligible students should regularly follow placement cell updates."
   },
   {
     "title": "Sports Meet",
     "type": "Sports",
-    "date": "Next Month",
-    "time": "09:30 AM",
+    "date": "November 8",
+    "time": "08:30 AM",
     "venue": "Sports Complex",
     "details": "Sports Meet includes cricket, volleyball, athletics, badminton, and indoor games for all departments."
   }
