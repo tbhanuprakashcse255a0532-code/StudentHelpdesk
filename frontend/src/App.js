@@ -207,20 +207,49 @@ const StudentLogin = ({ setLoggedIn, setUser, closeLogin }) => {
   );
 };
 
-const AdminLogin = ({ setLoggedIn, setUser, closeLogin }) => {
-  const navigate = useNavigate();
-  const popupRef = useRef(null);
 
+// Admin Login component
+// Manages admin login and popup behavior
+const AdminLogin = ({ setLoggedIn, setUser, closeLogin }) => {
+
+  // Used for page navigation after successful login
+  const navigate = useNavigate();
+
+  // Stores a reference to the login popup
+  const loginBoxRef = useRef(null);
+
+  // Admin login form values
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  // Indicates whether the login process is in progress
   const [loading, setLoading] = useState(false);
 
+  // Detect clicks outside the login popup
   useEffect(() => {
-    const handleOutsideClick = (event) => {
-      if (popupRef.current && !popupRef.current.contains(event.target)) {
+
+    // Function to handle clicks on the document
+    const checkOutsideClick = (event) => {
+      const loginBox = loginBoxRef.current;
+
+      // Close the popup if the click occurs outside the login box
+      if (loginBox && !loginBox.contains(event.target)) {
         closeLogin();
       }
     };
+
+    // Listen for mouse clicks on the page
+    document.addEventListener("mousedown", checkOutsideClick);
+
+    // Remove the event listener when the component is unmounted
+    return () => {
+      document.removeEventListener("mousedown", checkOutsideClick);
+    };
+  }, [closeLogin]);
+
+  // Rest of the login functionality remains unchanged...
+};
+
 
     document.addEventListener("mousedown", handleOutsideClick);
     return () => document.removeEventListener("mousedown", handleOutsideClick);
