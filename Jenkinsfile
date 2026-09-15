@@ -70,25 +70,26 @@ pipeline {
         }
 
         stage('Deploy') {
-            steps {
-                bat '''
-                    echo ===== Deploying StudentHelpdesk =====
+    steps {
+        bat '''
+            echo ===== Deploying StudentHelpdesk =====
 
-                    robocopy "%WORKSPACE%\\Backend" "C:\\StudentHelpdeskDeploy\\Backend" /E /XD node_modules /XF .env
+            robocopy "%WORKSPACE%\\Backend" "C:\\StudentHelpdeskDeploy\\Backend" /E /XD node_modules /XF .env
 
-                    if %ERRORLEVEL% GEQ 8 exit /b %ERRORLEVEL%
+            if %ERRORLEVEL% GEQ 8 exit /b %ERRORLEVEL%
 
-                    cd /d C:\\StudentHelpdeskDeploy\\Backend
+            cd /d C:\\StudentHelpdeskDeploy\\Backend
 
-                    call npm ci
+            call npm ci
 
-                    set PM2_HOME=C:\\StudentHelpdeskDeploy\\.pm2
+            set PM2_HOME=C:\\StudentHelpdeskDeploy\\.pm2
 
-                    call "C:\\Users\\hp\\AppData\\Roaming\\npm\\pm2.cmd" restart studenthelpdesk-backend
+            call "C:\\Users\\hp\\AppData\\Roaming\\npm\\pm2.cmd" restart studenthelpdesk-backend || call "C:\\Users\\hp\\AppData\\Roaming\\npm\\pm2.cmd" start server.js --name studenthelpdesk-backend
 
-                    echo ===== Deployment Completed =====
-                '''
-            }
-        }
+            call "C:\\Users\\hp\\AppData\\Roaming\\npm\\pm2.cmd" save
+
+            echo ===== Deployment Completed =====
+        '''
     }
+}
 }
