@@ -72,7 +72,9 @@ pipeline {
         stage('Deploy') {
             steps {
                 bat '''
-                    echo ===== Deploying StudentHelpdesk =====
+                    echo ========================================
+                    echo Deploying StudentHelpdesk
+                    echo ========================================
 
                     robocopy "%WORKSPACE%\\Backend" "C:\\StudentHelpdeskDeploy\\Backend" /E /XD node_modules /XF .env
 
@@ -80,15 +82,27 @@ pipeline {
 
                     cd /d C:\\StudentHelpdeskDeploy\\Backend
 
+                    echo Installing production dependencies...
+
                     call npm ci
+
+                    echo Configuring PM2...
 
                     set PM2_HOME=C:\\StudentHelpdeskDeploy\\.pm2
 
+                    set JENKINS_NODE_COOKIE=dontKillMe
+
+                    echo Starting or restarting backend...
+
                     call "C:\\Users\\hp\\AppData\\Roaming\\npm\\pm2.cmd" restart studenthelpdesk-backend || call "C:\\Users\\hp\\AppData\\Roaming\\npm\\pm2.cmd" start server.js --name studenthelpdesk-backend
+
+                    echo Saving PM2 process...
 
                     call "C:\\Users\\hp\\AppData\\Roaming\\npm\\pm2.cmd" save
 
-                    echo ===== Deployment Completed =====
+                    echo ========================================
+                    echo Deployment Completed
+                    echo ========================================
                 '''
             }
         }
