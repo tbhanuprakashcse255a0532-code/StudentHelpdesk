@@ -76,32 +76,42 @@ pipeline {
                     echo Deploying StudentHelpdesk
                     echo ========================================
 
+                    echo.
+                    echo ===== Deploying Backend =====
+
                     robocopy "%WORKSPACE%\\Backend" "C:\\StudentHelpdeskDeploy\\Backend" /E /XD node_modules /XF .env
 
                     if %ERRORLEVEL% GEQ 8 exit /b %ERRORLEVEL%
 
                     cd /d C:\\StudentHelpdeskDeploy\\Backend
 
-                    echo Installing production dependencies...
+                    echo Installing backend dependencies...
 
                     call npm ci
 
                     echo Configuring PM2...
 
-                    set PM2_HOME=C:\\StudentHelpdeskDeploy\\.pm2
-
-                    set JENKINS_NODE_COOKIE=dontKillMe
+                    set "PM2_HOME=C:\\StudentHelpdeskDeploy\\.pm2"
+                    set "JENKINS_NODE_COOKIE=dontKillMe"
 
                     echo Starting or restarting backend...
 
                     call "C:\\Users\\hp\\AppData\\Roaming\\npm\\pm2.cmd" restart studenthelpdesk-backend || call "C:\\Users\\hp\\AppData\\Roaming\\npm\\pm2.cmd" start server.js --name studenthelpdesk-backend
 
-                    echo Saving PM2 process...
+                    echo Saving PM2 process list...
 
                     call "C:\\Users\\hp\\AppData\\Roaming\\npm\\pm2.cmd" save
 
+                    echo.
+                    echo ===== Deploying Frontend to IIS =====
+
+                    robocopy "%WORKSPACE%\\frontend\\build" "C:\\inetpub\\wwwroot\\StudentHelpdesk" /MIR
+
+                    if %ERRORLEVEL% GEQ 8 exit /b %ERRORLEVEL%
+
+                    echo.
                     echo ========================================
-                    echo Deployment Completed
+                    echo Deployment Completed Successfully
                     echo ========================================
                 '''
             }
