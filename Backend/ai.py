@@ -19,58 +19,104 @@ class HelpdeskAI:
         self.cursor = self.conn.cursor(dictionary=True)
 
     def close(self):
+    # Close the database cursor
         self.cursor.close()
+
+    # Close the database connection
         self.conn.close()
 
-    def norm(self, text):
-        return re.sub(r"\s+", " ", (text or "").lower()).strip()
 
-    def clean(self, text):
-        return re.sub(r"[^a-z0-9\s]", "", (text or "").lower()).strip()
+def norm(self, text):
+    # Convert text to lowercase and replace multiple spaces
+    # with a single space, then remove leading/trailing spaces
+    return re.sub(r"\s+", " ", (text or "").lower()).strip()
 
-    def has_any(self, text, words):
-        return any(w in text for w in words)
 
-    def wants_count(self, text):
-        return self.has_any(text, ["how many", "count", "number", "total"])
+def clean(self, text):
+    # Convert text to lowercase and remove all characters
+    # except letters, numbers, and spaces
+    return re.sub(r"[^a-z0-9\s]", "", (text or "").lower()).strip()
 
-    def wants_latest(self, text):
-        return self.has_any(text, ["latest", "recent", "newest", "last added", "new", "ongoing", "current", "upcoming"])
 
-    def wants_list(self, text):
-        return self.has_any(text, [
-            "list", "show", "display", "available", "all",
-            "names", "with their names", "event names", "give names",
-            "what are the", "tell me the"
-        ])
+def has_any(self, text, words):
+    # Check whether any of the given words exist in the text
+    return any(w in text for w in words)
 
-    def fetch_one(self, query, params=()):
-        self.cursor.execute(query, params)
-        return self.cursor.fetchone()
 
-    def fetch_all(self, query, params=()):
-        self.cursor.execute(query, params)
-        return self.cursor.fetchall()
+def wants_count(self, text):
+    # Check if the user is asking for a count or total
+    return self.has_any(text, ["how many", "count", "number", "total"])
 
-    def total_events(self):
-        row = self.fetch_one("SELECT COUNT(*) AS total FROM events")
-        return row["total"] if row else 0
 
-    def count_type(self, event_type):
-        row = self.fetch_one(
-            "SELECT COUNT(*) AS total FROM events WHERE LOWER(type)=LOWER(%s)",
-            (event_type,)
-        )
-        return row["total"] if row else 0
+def wants_latest(self, text):
+    # Check if the user is asking for the latest/recent event
+    return self.has_any(text, [
+        "latest", "recent", "newest", "last added",
+        "new", "ongoing", "current", "upcoming"
+    ])
 
-    def latest_event(self):
-        return self.fetch_one("SELECT * FROM events ORDER BY id DESC LIMIT 1")
 
-    def latest_type(self, event_type):
-        return self.fetch_one(
-            "SELECT * FROM events WHERE LOWER(type)=LOWER(%s) ORDER BY id DESC LIMIT 1",
-            (event_type,)
-        )
+def wants_list(self, text):
+    # Check if the user wants a list or names of events
+    return self.has_any(text, [
+        "list", "show", "display", "available", "all",
+        "names", "with their names", "event names",
+        "give names", "what are the", "tell me the"
+    ])
+
+
+def fetch_one(self, query, params=()):
+    # Execute a SQL query and return a single row
+    self.cursor.execute(query, params)
+    return self.cursor.fetchone()
+
+
+def fetch_all(self, query, params=()):
+    # Execute a SQL query and return all matching rows
+    self.cursor.execute(query, params)
+    return self.cursor.fetchall()
+
+
+def total_events(self):
+    # Count the total number of events in the events table
+    row = self.fetch_one(
+        "SELECT COUNT(*) AS total FROM events"
+    )
+
+    # Return the count if a row exists, otherwise return 0
+    return row["total"] if row else 0
+
+
+def count_type(self, event_type):
+    # Count events that match the specified event type
+    # LOWER() makes the comparison case-insensitive
+    row = self.fetch_one(
+        "SELECT COUNT(*) AS total FROM events "
+        "WHERE LOWER(type)=LOWER(%s)",
+        (event_type,)
+    )
+
+    # Return the count if a row exists, otherwise return 0
+    return row["total"] if row else 0
+
+
+def latest_event(self):
+    # Get the most recently added event
+    # Higher ID values are treated as newer records
+    return self.fetch_one(
+        "SELECT * FROM events ORDER BY id DESC LIMIT 1"
+    )
+
+
+def latest_type(self, event_type):
+    # Get the most recently added event of a specific type
+    # The type comparison is case-insensitive
+    return self.fetch_one(
+        "SELECT * FROM events "
+        "WHERE LOWER(type)=LOWER(%s) "
+        "ORDER BY id DESC LIMIT 1",
+        (event_type,)
+    )
 
     def list_all_events(self):
         return self.fetch_all("SELECT * FROM events ORDER BY id DESC")
