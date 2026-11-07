@@ -1,13 +1,37 @@
 import crypto from "node:crypto";
 import { promisify } from "node:util";
 
-export async function hashPassword(password) {
-  if (typeof password !== "string" || !password) throw new Error("Password is required");
-  const nonce = crypto.randomBytes(16);
-  const tag = await promisify(crypto.argon2)("argon2id", {
-    message: Buffer.from(password), nonce, memory: 65536, passes: 3, parallelism: 4, tagLength: 32
-  });
-  const b64 = value => value.toString("base64").replace(/=+$/, "");
-  return '$argon2id$v=19$m=65536,t=3,p=4$' + b64(nonce) + '$' + b64(tag);
-}
+const generateHash = promisify(crypto.argon2);
 
+const toBase64 = (data) =>
+  data.toString("base64").replace(/=+$/, "");
+
+export async function hashPassword(password) {
+  if (!password || typeof password !== "string") {
+    throw new Error("Password is required");
+  }
+
+  const salt = crypto.randomBytes(16);
+
+  const parameters = {
+    message: Buffer.from(password),
+    nonce: salt,
+    memory: 65536,
+    passes: 3,
+    parallelism: 4,
+    tagLength: 32
+  };
+
+  const hash = await generateHash("argon2id", parameters);
+
+  const saltValue = toBase64(salt);
+  const hashValue = toBase64(hash);
+
+  const result = [
+    "$argon2id$v=19$m=65536,t=3,p=4",
+    saltValue,
+    hashValue
+  ].join("$");
+
+  return result;
+}
