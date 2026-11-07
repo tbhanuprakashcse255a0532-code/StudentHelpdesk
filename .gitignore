@@ -29,3 +29,8 @@ venv/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Local Docker database backup
+docker/mysql/init/*.sql
+
+s_helpdesk_backup_before_security_changes.sql

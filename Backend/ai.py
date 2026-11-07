@@ -1,3 +1,4 @@
+
 import mysql.connector
 import json
 import sys
@@ -9,6 +10,7 @@ load_dotenv()
 
 
 class HelpdeskAI:
+
     def __init__(self, host, user, password, database):
         self.conn = mysql.connector.connect(
             host=host,
@@ -19,56 +21,90 @@ class HelpdeskAI:
         self.cursor = self.conn.cursor(dictionary=True)
 
     def close(self):
+        # Close the database cursor
         self.cursor.close()
+
+        # Close the database connection
         self.conn.close()
 
     def norm(self, text):
+        # Convert text to lowercase and replace multiple spaces
+        # with a single space, then remove leading/trailing spaces
         return re.sub(r"\s+", " ", (text or "").lower()).strip()
 
     def clean(self, text):
+        # Convert text to lowercase and remove all characters
+        # except letters, numbers, and spaces
         return re.sub(r"[^a-z0-9\s]", "", (text or "").lower()).strip()
 
     def has_any(self, text, words):
+        # Check whether any of the given words exist in the text
         return any(w in text for w in words)
 
     def wants_count(self, text):
+        # Check if the user is asking for a count or total
         return self.has_any(text, ["how many", "count", "number", "total"])
 
     def wants_latest(self, text):
-        return self.has_any(text, ["latest", "recent", "newest", "last added", "new", "ongoing", "current", "upcoming"])
+        # Check if the user is asking for the latest/recent event
+        return self.has_any(text, [
+            "latest", "recent", "newest", "last added",
+            "new", "ongoing", "current", "upcoming"
+        ])
 
     def wants_list(self, text):
+        # Check if the user wants a list or names of events
         return self.has_any(text, [
             "list", "show", "display", "available", "all",
-            "names", "with their names", "event names", "give names",
-            "what are the", "tell me the"
+            "names", "with their names", "event names",
+            "give names", "what are the", "tell me the"
         ])
 
     def fetch_one(self, query, params=()):
+        # Execute a SQL query and return a single row
         self.cursor.execute(query, params)
         return self.cursor.fetchone()
 
     def fetch_all(self, query, params=()):
+        # Execute a SQL query and return all matching rows
         self.cursor.execute(query, params)
         return self.cursor.fetchall()
 
     def total_events(self):
-        row = self.fetch_one("SELECT COUNT(*) AS total FROM events")
+        # Count the total number of events in the events table
+        row = self.fetch_one(
+            "SELECT COUNT(*) AS total FROM events"
+        )
+
+        # Return the count if a row exists, otherwise return 0
         return row["total"] if row else 0
 
     def count_type(self, event_type):
+        # Count events that match the specified event type
+        # LOWER() makes the comparison case-insensitive
         row = self.fetch_one(
-            "SELECT COUNT(*) AS total FROM events WHERE LOWER(type)=LOWER(%s)",
+            "SELECT COUNT(*) AS total FROM events "
+            "WHERE LOWER(type)=LOWER(%s)",
             (event_type,)
         )
+
+        # Return the count if a row exists, otherwise return 0
         return row["total"] if row else 0
 
     def latest_event(self):
-        return self.fetch_one("SELECT * FROM events ORDER BY id DESC LIMIT 1")
+        # Get the most recently added event
+        # Higher ID values are treated as newer records
+        return self.fetch_one(
+            "SELECT * FROM events ORDER BY id DESC LIMIT 1"
+        )
 
     def latest_type(self, event_type):
+        # Get the most recently added event of a specific type
+        # The type comparison is case-insensitive
         return self.fetch_one(
-            "SELECT * FROM events WHERE LOWER(type)=LOWER(%s) ORDER BY id DESC LIMIT 1",
+            "SELECT * FROM events "
+            "WHERE LOWER(type)=LOWER(%s) "
+            "ORDER BY id DESC LIMIT 1",
             (event_type,)
         )
 
@@ -86,6 +122,7 @@ class HelpdeskAI:
             return "No event found."
 
         lines = []
+
         if e.get("name"):
             lines.append(f"📌 {e['name']}")
         if e.get("type"):
@@ -112,6 +149,7 @@ class HelpdeskAI:
             lines.append(f"✅ Eligibility: {e['eligibility']}")
         if e.get("registration_link"):
             lines.append(f"🔗 Registration Link: {e['registration_link']}")
+
         return "\n".join(lines)
 
     def format_event_list(self, rows, heading="Available events"):
@@ -119,11 +157,13 @@ class HelpdeskAI:
             return f"No {heading.lower()} found."
 
         lines = [f"{heading}:"]
+
         for e in rows:
             name = e.get("name") or "Unnamed"
             etype = e.get("type") or "Unknown"
             date = e.get("date") or "No date"
             lines.append(f"• {name} - {etype} - {date}")
+
         return "\n".join(lines)
 
     def find_event_by_name(self, message):
@@ -132,10 +172,12 @@ class HelpdeskAI:
 
         for e in rows:
             name = self.clean(e.get("name", ""))
+
             if name and name in msg:
                 return e
 
         words = [w for w in msg.split() if len(w) > 3]
+
         for e in rows:
             blob = " ".join([
                 self.clean(e.get("name", "")),
@@ -143,8 +185,10 @@ class HelpdeskAI:
                 self.clean(e.get("venue", "")),
                 self.clean(e.get("type", ""))
             ])
+
             if any(word in blob for word in words):
                 return e
+
         return None
 
     def search_qa(self, message):
@@ -157,15 +201,19 @@ class HelpdeskAI:
 
         for row in rows:
             q = self.clean(row.get("question", ""))
+
             if q and q in msg:
                 return row.get("answer")
 
         words = [w for w in msg.split() if len(w) > 3]
+
         for row in rows:
             q = self.clean(row.get("question", ""))
             a = self.clean(row.get("answer", ""))
+
             if any(word in q or word in a for word in words):
                 return row.get("answer")
+
         return None
 
     def search_pdfs(self, message):
@@ -184,6 +232,7 @@ class HelpdeskAI:
 
         for row in rows:
             text = self.clean(row.get("extracted_text", ""))
+
             if msg and msg in text:
                 return {
                     "reply": "I found related information in an uploaded PDF/document.",
@@ -193,18 +242,20 @@ class HelpdeskAI:
 
         for row in rows:
             text = self.clean(row.get("extracted_text", ""))
+
             if any(word in text for word in words):
                 return {
                     "reply": "I found related information in an uploaded PDF/document.",
                     "pdfPath": row.get("file_path", "") or "",
                     "pdfTitle": row.get("file_name", "") or "Document"
                 }
+
         return None
 
     def reply(self, message, student_id=None):
         msg = self.norm(message)
 
-        # greetings
+        # Greetings
         if msg in ["hi", "hello", "hey", "hii", "helo", "good morning", "good evening"]:
             return {
                 "reply": "Hello 👋 I am your MGIT Student Helpdesk Assistant.\nHow can I help you today?",
@@ -219,179 +270,214 @@ class HelpdeskAI:
                 "pdfTitle": ""
             }
 
-        # all events count
+        # All events count
         if self.wants_count(msg) and self.has_any(msg, ["events", "event"]) and not self.has_any(
             msg, ["tech fest", "techfest", "workshop", "workshops", "sports", "sport", "scholarship", "scholarships", "placement", "placements", "exam", "exams"]
         ):
             total = self.total_events()
+
             return {
                 "reply": f"There are currently {total} total events available.",
                 "pdfPath": "",
                 "pdfTitle": ""
             }
 
-        # list all events
+        # List all events
         if (
             self.has_any(msg, ["events", "event"])
             and self.wants_list(msg)
             and not self.has_any(msg, ["tech fest", "techfest", "workshop", "workshops", "sports", "sport", "scholarship", "scholarships", "placement", "placements", "exam", "exams"])
         ) or msg in ["events", "event", "list all events", "show all events", "event names", "events with their names"]:
+
             rows = self.list_all_events()
+
             return {
                 "reply": self.format_event_list(rows, "Available events"),
                 "pdfPath": "",
                 "pdfTitle": ""
             }
 
-        # latest generic event
+        # Latest generic event
         if self.wants_latest(msg) and self.has_any(msg, ["event", "events"]):
             e = self.latest_event()
+
             return {
                 "reply": "Here is the latest event:\n\n" + self.format_event(e),
                 "pdfPath": "",
                 "pdfTitle": ""
             }
 
-        # tech fest
+        # Tech fest
         if self.has_any(msg, ["tech fest", "techfest", "tech event", "tech events"]):
             if self.wants_count(msg):
                 count = self.count_type("Tech Fest")
+
                 return {
                     "reply": f"There are {count} Tech Fest event(s) currently available.",
                     "pdfPath": "",
                     "pdfTitle": ""
                 }
+
             if self.wants_latest(msg):
                 e = self.latest_type("Tech Fest")
+
                 return {
                     "reply": "Latest Tech Fest event:\n\n" + self.format_event(e),
                     "pdfPath": "",
                     "pdfTitle": ""
                 }
+
             rows = self.list_type("Tech Fest")
+
             return {
                 "reply": self.format_event_list(rows, "Tech Fest events"),
                 "pdfPath": "",
                 "pdfTitle": ""
             }
 
-        # workshops
+        # Workshops
         if self.has_any(msg, ["workshop", "workshops"]):
             if self.wants_count(msg):
                 count = self.count_type("Workshops")
+
                 return {
                     "reply": f"There are {count} Workshop event(s) currently available.",
                     "pdfPath": "",
                     "pdfTitle": ""
                 }
+
             if self.wants_latest(msg):
                 e = self.latest_type("Workshops")
+
                 return {
                     "reply": "Latest Workshop:\n\n" + self.format_event(e),
                     "pdfPath": "",
                     "pdfTitle": ""
                 }
+
             rows = self.list_type("Workshops")
+
             return {
                 "reply": self.format_event_list(rows, "Available workshops"),
                 "pdfPath": "",
                 "pdfTitle": ""
             }
 
-        # sports
+        # Sports
         if self.has_any(msg, ["sport", "sports"]):
             if self.wants_count(msg):
                 count = self.count_type("Sports")
+
                 return {
                     "reply": f"There are {count} Sports event(s) currently available.",
                     "pdfPath": "",
                     "pdfTitle": ""
                 }
+
             if self.wants_latest(msg):
                 e = self.latest_type("Sports")
+
                 return {
                     "reply": "Latest Sports event:\n\n" + self.format_event(e),
                     "pdfPath": "",
                     "pdfTitle": ""
                 }
+
             rows = self.list_type("Sports")
+
             return {
                 "reply": self.format_event_list(rows, "Available sports events"),
                 "pdfPath": "",
                 "pdfTitle": ""
             }
 
-        # scholarship
+        # Scholarship
         if self.has_any(msg, ["scholarship", "scholarships"]):
             if self.wants_count(msg):
                 count = self.count_type("Scholarship")
+
                 return {
                     "reply": f"There are {count} Scholarship item(s) currently available.",
                     "pdfPath": "",
                     "pdfTitle": ""
                 }
+
             if self.wants_latest(msg):
                 e = self.latest_type("Scholarship")
+
                 return {
                     "reply": "Latest Scholarship:\n\n" + self.format_event(e),
                     "pdfPath": "",
                     "pdfTitle": ""
                 }
+
             rows = self.list_type("Scholarship")
+
             return {
                 "reply": self.format_event_list(rows, "Available scholarships"),
                 "pdfPath": "",
                 "pdfTitle": ""
             }
 
-        # exams
+        # Exams
         if self.has_any(msg, ["exam", "exams"]):
             if self.wants_count(msg):
                 count = self.count_type("Exams")
+
                 return {
                     "reply": f"There are {count} Exam item(s) currently available.",
                     "pdfPath": "",
                     "pdfTitle": ""
                 }
+
             if self.wants_latest(msg):
                 e = self.latest_type("Exams")
+
                 return {
                     "reply": "Latest Exam update:\n\n" + self.format_event(e),
                     "pdfPath": "",
                     "pdfTitle": ""
                 }
+
             rows = self.list_type("Exams")
+
             return {
                 "reply": self.format_event_list(rows, "Available exams"),
                 "pdfPath": "",
                 "pdfTitle": ""
             }
 
-        # placements
+        # Placements
         if self.has_any(msg, ["placement", "placements"]):
             if self.wants_count(msg):
                 count = self.count_type("Placements")
+
                 return {
                     "reply": f"There are {count} Placement item(s) currently available.",
                     "pdfPath": "",
                     "pdfTitle": ""
                 }
+
             if self.wants_latest(msg):
                 e = self.latest_type("Placements")
+
                 return {
                     "reply": "Latest Placement update:\n\n" + self.format_event(e),
                     "pdfPath": "",
                     "pdfTitle": ""
                 }
+
             rows = self.list_type("Placements")
+
             return {
                 "reply": self.format_event_list(rows, "Available placements"),
                 "pdfPath": "",
                 "pdfTitle": ""
             }
 
-        # specific event name
+        # Specific event name
         e = self.find_event_by_name(msg)
+
         if e:
             return {
                 "reply": self.format_event(e),
@@ -399,8 +485,9 @@ class HelpdeskAI:
                 "pdfTitle": ""
             }
 
-        # QA
+        # Q&A
         qa = self.search_qa(msg)
+
         if qa:
             return {
                 "reply": qa,
@@ -410,6 +497,7 @@ class HelpdeskAI:
 
         # PDFs
         pdf = self.search_pdfs(msg)
+
         if pdf:
             return pdf
 
@@ -421,6 +509,7 @@ class HelpdeskAI:
 
 
 if __name__ == "__main__":
+
     message = sys.argv[1] if len(sys.argv) > 1 else ""
     student_id_raw = sys.argv[2] if len(sys.argv) > 2 else ""
     student_id = int(student_id_raw) if str(student_id_raw).isdigit() else None
@@ -435,11 +524,13 @@ if __name__ == "__main__":
     try:
         result = ai.reply(message, student_id)
         print(json.dumps(result))
+
     except Exception as e:
         print(json.dumps({
             "reply": f"Python error: {str(e)}",
             "pdfPath": "",
             "pdfTitle": ""
         }))
+
     finally:
         ai.close()

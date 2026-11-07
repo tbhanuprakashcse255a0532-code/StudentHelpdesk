@@ -1,10 +1,11 @@
+
 [
   {
     "title": "Tech Fest",
     "type": "Tech Fest",
     "date": "March 25",
     "time": "10:00 AM",
-    "venue": "Main Auditorium",
+    "venue": "Innovation Center",
     "details": "Tech Fest includes coding competitions, project expo, technical quiz, and innovation challenges for students."
   },
   {
@@ -12,7 +13,7 @@
     "type": "Exam",
     "date": "April 10",
     "time": "09:00 AM",
-    "venue": "Examination Block",
+    "venue": "Academic Building",
     "details": "Semester examinations begin from April 10. Students should check department notice boards for the detailed timetable."
   },
   {
@@ -20,7 +21,7 @@
     "type": "AI Workshop",
     "date": "March 28",
     "time": "10:00 AM",
-    "venue": "Seminar Hall",
+    "venue": "Computer Lab 2",
     "details": "AI Workshop covers machine learning basics, chatbot design, and practical applications of artificial intelligence."
   },
   {
@@ -28,7 +29,7 @@
     "type": "Placement",
     "date": "Ongoing",
     "time": "Office Hours",
-    "venue": "Placement Cell",
+    "venue": "Career Development Center",
     "details": "Placements are ongoing for final year students. Eligible students should regularly follow placement cell updates."
   },
   {
@@ -36,7 +37,7 @@
     "type": "Sports",
     "date": "Next Month",
     "time": "09:30 AM",
-    "venue": "College Ground",
+    "venue": "Sports Complex",
     "details": "Sports Meet includes cricket, volleyball, athletics, badminton, and indoor games for all departments."
   }
 ]
